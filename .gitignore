@@ -2,4 +2,4 @@
 __pycache__/
 */__pycache__/
 */*/__pycache__/
-storage/data/payload.json
+app/storage/data/payload.json

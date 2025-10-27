@@ -1,5 +1,0 @@
-{
-  "message": "Hello from a gist-like raw endpoint",
-  "version": 1,
-  "scripts": ["approver.user.js", "helper.user.js"]
-}
