@@ -1,6 +1,0 @@
-[
-  {
-    "name": "Get Courses",
-    "code": "function getCourses() {\n    let xhr = new XMLHttpRequest();\n    const url = \"cons_cursos.php\";\n    xhr.open(\"GET\", url, true);\n\n    xhr.onreadystatechange = function() {\n        if (xhr.readyState === 4) {\n            if (xhr.status === 200) {\n                let coursesVector = xhr.responseText.split('|');\n                for (let i=0; i < coursesVector[0]; i++) {\n                    let projectCode = coursesVector[2 + 3*i];\n                    let courseName = coursesVector[3 + 3*i];\n                    let courseCode = coursesVector[1 + 3*i];\n                    console.log(projectCode,'-', courseName, '-', courseCode);\n                }\n            } else {\n                console.error(\"Request failed with status:\", xhr.status);\n            }\n        }\n    };\n    xhr.send();\n}\n\ngetCourses();"
-  }
-]
