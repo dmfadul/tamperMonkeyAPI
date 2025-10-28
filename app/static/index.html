@@ -6,4 +6,32 @@
 
 <h2>Data Editor</h2>
 
+<button id="saveBtn">Save changes</button>
+
+
+<script>
+
+const BASE = "";
+const saveBtn = document.getElementById("saveBtn");
+
+// --- Save edited content ---
+saveBtn.onclick = async () => {
+    const path = "/raw/data/";
+
+    try {
+        const res = await fetch(BASE + path, {
+            method: "GET",
+            headers: { "content-type": "application/json" }
+        });
+        if (!res.ok) throw new Error(`Error fetching data: ${res.statusText}`);
+        console.log("Data fetched successfully.", await res.json());
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Failed to save changes.");
+    }
+
+};
+
+
+</script>
 </html>
