@@ -2,17 +2,43 @@
 <html lang="en">
 <meta charset="utf-8">
 <title>Simple Editor</title>
-
+<style></style>
 
 <h2>Data Editor</h2>
 
+<select id="fileSelect">
+    <option disabled selected>Loading options...</option>
+</select>
+
+<textarea id="editor" placeholder="File content will appear here..." ></textarea>
+
 <button id="saveBtn">Save changes</button>
 
+<p id="msg">Ready</p>
 
 <script>
-
 const BASE = "";
+const sel = document.getElementById("fileSelect");
+const editor = document.getElementById("editor");
+const msg = document.getElementById("msg");
 const saveBtn = document.getElementById("saveBtn");
+const FUNCTIONS_ARRAY = [];
+
+
+// --- Load functions list ---
+async function loadFunctions() {
+    const path = "/raw/data/";
+    try {
+        const res = await fetch(BASE + path);
+        if (!res.ok) throw new Error(`Error fetching data: ${res.statusText}`);
+        const data = await res.json();
+        console.log("Data fetched successfully.", data);
+    } catch (e) {
+        console.error("Error:", e);
+        msg.textContent = "Error: " + e.message;
+        return;
+    }
+}
 
 // --- Save edited content ---
 saveBtn.onclick = async () => {
