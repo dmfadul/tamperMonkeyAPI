@@ -2,7 +2,12 @@
 <html lang="en">
 <meta charset="utf-8">
 <title>Simple Editor</title>
-<style></style>
+<style>
+  body { font-family: sans-serif; margin: 2em; max-width: 600px; }
+  select, textarea, button { display: block; width: 100%; margin: 1em 0; }
+  textarea { height: 300px; font-family: monospace; }
+  #msg { color: #555; }
+</style>
 
 <h2>Data Editor</h2>
 
@@ -22,7 +27,7 @@ const sel = document.getElementById("fileSelect");
 const editor = document.getElementById("editor");
 const msg = document.getElementById("msg");
 const saveBtn = document.getElementById("saveBtn");
-const FUNCTIONS_ARRAY = [];
+let FUNCTIONS_ARRAY = [];
 
 
 // --- Load functions list ---
@@ -31,8 +36,15 @@ async function loadFunctions() {
     try {
         const res = await fetch(BASE + path);
         if (!res.ok) throw new Error(`Error fetching data: ${res.statusText}`);
-        const data = await res.json();
-        console.log("Data fetched successfully.", data);
+        FUNCTIONS_ARRAY = await res.json();
+        sel.innerHTML = "";
+        FUNCTIONS_ARRAY.forEach((f, index) => {
+            const opt = document.createElement("option");
+            opt.value = index;
+            opt.textContent = f.name;
+            sel.appendChild(opt);
+        });
+        
     } catch (e) {
         console.error("Error:", e);
         msg.textContent = "Error: " + e.message;
@@ -58,6 +70,8 @@ saveBtn.onclick = async () => {
 
 };
 
+// --- Initialize ---
+loadFunctions();
 
 </script>
 </html>
