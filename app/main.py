@@ -5,7 +5,7 @@ from app.config import CORS_ALLOW_ORIGINS, CORS_ALLOW_METHODS, CORS_ALLOW_HEADER
 from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
-app.mount("/", StaticFiles(directory="app/static", html=True), name="static")
+app.mount("/ui", StaticFiles(directory="app/static", html=True), name="static")
 
 # ---- CORS ----
 app.add_middleware(
