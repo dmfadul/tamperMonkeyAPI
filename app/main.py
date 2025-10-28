@@ -22,7 +22,7 @@ STORE_DIR = BASE_DIR / "storage"
 DATA_DIR = STORE_DIR / "data"
 
 
-@app.get("/")
+@app.get("/services/index")
 def root():
     return {"ok": True, "service": "gistlike-raw", "endpoints": ["/raw/data/"]}
 
