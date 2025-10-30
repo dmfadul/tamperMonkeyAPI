@@ -3,10 +3,65 @@
 <meta charset="utf-8">
 <title>Simple Editor</title>
 <style>
-  body { font-family: sans-serif; margin: 2em; max-width: 600px; }
-  select, textarea, button { display: block; width: 100%; margin: 1em 0; }
-  textarea { height: 300px; font-family: monospace; }
-  #msg { color: #555; }
+  html, body {
+    height: 100%;
+    margin: 0;
+    font-family: system-ui, sans-serif;
+    background: #f8fafc;
+  }
+
+  header {
+    background: #1e293b;
+    color: #fff;
+    padding: 0.8em 1.5em;
+    display: flex;
+    align-items: center;
+    gap: 1em;
+  }
+
+  h1 {
+    font-size: 1.1rem;
+    margin: 0;
+    flex: 1;
+  }
+
+  select, button {
+    font-size: 1rem;
+    padding: 0.4em 0.6em;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+  }
+
+  button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  button:hover { background: #1d4ed8; }
+  button:disabled { background: #94a3b8; cursor: not-allowed; }
+
+  #editor {
+    width: 100%;
+    height: calc(100vh - 110px);
+    resize: none;
+    border: none;
+    padding: 1em;
+    box-sizing: border-box;
+    font-family: monospace;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    background: #ffffff;
+  }
+
+  footer {
+    background: #f1f5f9;
+    padding: 0.5em 1.5em;
+    border-top: 1px solid #e2e8f0;
+    font-size: 0.9rem;
+    color: #475569;
+  }
 </style>
 
 <h2>Data Editor</h2>
@@ -15,7 +70,7 @@
     <option disabled selected>Loading options...</option>
 </select>
 
-<textarea id="editor" placeholder="File content will appear here..." ></textarea>
+<textarea id="editor" placeholder="Write a new function code here..." ></textarea>
 
 <button id="saveBtn">Save changes</button>
 
@@ -28,6 +83,7 @@ const editor = document.getElementById("editor");
 const msg = document.getElementById("msg");
 const saveBtn = document.getElementById("saveBtn");
 let FUNCTIONS_ARRAY = [];
+let FUNCTION_INDEX = null;
 
 
 // --- Load functions list ---
@@ -38,6 +94,10 @@ async function loadFunctions() {
         if (!res.ok) throw new Error(`Error fetching data: ${res.statusText}`);
         FUNCTIONS_ARRAY = await res.json();
         sel.innerHTML = "";
+        const opt = document.createElement("option");
+        opt.value = null;
+        opt.textContent = "-- Add a New Function --";
+        sel.appendChild(opt);
         FUNCTIONS_ARRAY.forEach((f, index) => {
             const opt = document.createElement("option");
             opt.value = index;
@@ -52,22 +112,63 @@ async function loadFunctions() {
     }
 }
 
+// --- Load selected file content when selection changes ---
+sel.onchange = async () => {
+    msg.textContent = "Loading...";
+    
+    const index = sel.value;
+    const fileInfo = FUNCTIONS_ARRAY[index];
+    FUNCTION_INDEX = index;
+    
+    editor.value = fileInfo.code;
+    msg.textContent = `Loaded: ${fileInfo.name}`;
+};
+
 // --- Save edited content ---
 saveBtn.onclick = async () => {
     const path = "/raw/data/";
+    const editorContent = editor.value.trim();
+    if (!editorContent) {
+        msg.textContent = "Error: Function code is empty.";
+        return;
+    }
+
+    msg.textContent = "Saving...";
+
+    if (FUNCTION_INDEX === null) {
+        // New function: prompt for name
+        const name = prompt("Enter a name for the new function:");
+        if (!name) {
+            msg.textContent = "Save canceled: no name provided.";
+            return;
+        }
+
+        // Create new function entry
+        FUNCTIONS_ARRAY.push({
+            name: name.trim(),
+            code: editorContent
+        });
+        FUNCTION_INDEX = FUNCTIONS_ARRAY.length - 1;
+    } else {
+        // Edit existing function
+        FUNCTIONS_ARRAY[FUNCTION_INDEX].code = editorContent;
+    }
+
+    const content = JSON.stringify(FUNCTIONS_ARRAY, null, 2);
+
 
     try {
         const res = await fetch(BASE + path, {
-            method: "GET",
-            headers: { "content-type": "application/json" }
+            method: "PUT",
+            headers: { "content-type": "application/json" },
+            body: content
         });
-        if (!res.ok) throw new Error(`Error fetching data: ${res.statusText}`);
-        console.log("Data fetched successfully.", await res.json());
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Failed to save changes.");
+        if (!res.ok) throw new Error(res.status);
+        msg.textContent = "Saved successfully.";        
+    } catch (e) {
+        console.error("Error:", e);
+        msg.textContent = "Error: " + e.message;
     }
-
 };
 
 // --- Initialize ---
